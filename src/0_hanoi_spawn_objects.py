@@ -291,7 +291,7 @@ def main():
     raw_input('Add a mesh to rviz')
     mesh_pose = geometry_msgs.msg.PoseStamped() # Set the parameter
     mesh_pose.header.frame_id = 'world'         # Put the mesh in 'world' frame
-    mesh_pose.pose.position.x = 0.25            # Specify x of the mesh
+    mesh_pose.pose.position.x = 0.4            # Specify x of the mesh
     mesh_pose.pose.position.y = 0.0             # Specify y of the mesh
     mesh_pose.pose.position.z = 0.0             # Specify z of the mesh
     pathPlanObject.add_mesh('tower1', mesh_pose, MESH_FILE_PATH[0], (.00095,.00095,.00095))
