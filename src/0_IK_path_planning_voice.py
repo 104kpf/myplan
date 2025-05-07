@@ -162,17 +162,37 @@ def callback(data):
     except KeyError as e:
         rospy.logerr("Missing key in JSON data: %s", e)
 
+def whichpoint(point):
+  global x_input, y_input, z_input
+  if point=='a':
+    x_input=0.25
+    y_input=0.15
+    z_input=0.05
+  elif point =='b':
+    x_input=0.25
+    y_input=0.00
+    z_input=0.05
+  else:
+    x_input=0.25
+    y_input=-0.15
+    z_input=0.05
+
+
 
 def main():
+  global command, x_input, y_input, z_input
   try:
     path_object = MoveGroupPythonIntefaceTutorial()
     print("ctrl + z to close")
+    rospy.Subscriber("gpt_reply_to_user", String, callback)
+    print("wating for input")
     while not rospy.is_shutdown():
-  
+      
+      if command is not None:
         try:
-          x_input=float(input("x(m):  "))
-          y_input=float(input("y(m):  "))
-          z_input=float(input("z(m):  "))
+          point = command["point"]
+          whichpoint(point)
+          
           q_input = pi/2
 
 
@@ -181,6 +201,7 @@ def main():
           You just need to solve IK of a point, path planning will automatically be taken.  
           '''
           path_object.go_to_joint_state()
+          command = None
 
         except:
           '''go back to home if weird input'''
@@ -194,4 +215,5 @@ def main():
 
 if __name__ == '__main__':
   main()
+
 

@@ -13,9 +13,12 @@ import json
 import time
 import math
 import numpy as np
-
+import json
+from std_msgs.msg import String
+global command
 '''Variable for end-effector'''
 EefState = 0
+command = None
 
 '''Hanoi tower geometry'''
 #You can measure these in Lab402
@@ -491,10 +494,22 @@ def placeobs():
     # box_pose.pose.position.z = 0.09       # Specify z of the box
     # pathPlanObject.add_box('box_4', box_pose, (0.005, 0.5, 0.18)) #Specify box name, box pose, size in xyz
     
+def callback(data):
+    global command
+    rospy.loginfo("Received: %s", data.data)
     
+    try:
+        command = json.loads(data.data)
+        
+        
+    except json.JSONDecodeError as e:
+        rospy.logerr("Error decoding JSON: %s", e)
+    except KeyError as e:
+        rospy.logerr("Missing key in JSON data: %s", e)   
 
 def main():
-  global pub_EefState, EefState, goal_input
+  global pub_EefState, EefState, goal_input, command
+  rospy.Subscriber("gpt_reply_to_user", String, callback)
   tower = {
         'a': [], 
         'b': [], 
@@ -506,9 +521,9 @@ def main():
         'c': [0.255, -0.159, 0.065]
     }
   '''positions = {
-        'a': [0.256, 0.153, 0.065],
-        'b': [0.254, 0.0, 0.065],
-        'c': [0.254, -0.154, 0.065]
+        'a': [0.252, 0.153, 0.065],
+        'b': [0.252, 0.0, 0.065],
+        'c': [0.252, -0.154, 0.065]
     }'''
   try:
     
@@ -521,35 +536,37 @@ def main():
     print("ctrl + z to close")
     input('Remove all object from rviz')
     pathPlanObject.remove_world_object()
-    
+    placeobs()
     
     while not rospy.is_shutdown():
-        try:
-          placeobs()
-          start_input = input("enter start pos (a, b, or c):  ").strip().lower()
-          placetower(start_input)
-          tower = {
-            'a': [], 
-            'b': [], 
-            'c': []
-          }
-          tower[start_input] = ['tower1', 'tower2', 'tower3']
-          goal_input = input("enter goal pos (a, b, or c):  ").strip().lower()
-          aux = next(pos for pos in 'abc' if pos not in [start_input, goal_input])
+      if command is not None:
+          try:
+            
+            start_input = command["start"]
+            placetower(start_input)
+            tower = {
+              'a': [], 
+              'b': [], 
+              'c': []
+            }
+            tower[start_input] = ['tower1', 'tower2', 'tower3']
+            goal_input = command["goal"]
+            aux = next(pos for pos in 'abc' if pos not in [start_input, goal_input])
 
-          start_time = time.time()
-          hanoi(3, start_input, goal_input, aux, move_disc, pathPlanObject, tower, positions)
-          pathPlanObject.joint_angles = [0,-pi/2,pi/2,0]
-          pathPlanObject.go_to_joint_state()
-          EefState = 0
+            start_time = time.time()
+            hanoi(3, start_input, goal_input, aux, move_disc, pathPlanObject, tower, positions)
+            pathPlanObject.joint_angles = [0,-pi/2,pi/2,0]
+            pathPlanObject.go_to_joint_state()
+            EefState = 0
 
-          print("total time elapse: ", time.time() - start_time)
-          pub_EefState.publish(EefState)  #publish end-effector state
+            print("total time elapse: ", time.time() - start_time)
+            pub_EefState.publish(EefState)  #publish end-effector state
+            command = None
 
-        except: 
-          '''Go back to home if weird input'''
-          pathPlanObject.joint_angles = [0,-pi/2,pi/2,0]
-          pathPlanObject.go_to_joint_state()
+          except: 
+            '''Go back to home if weird input'''
+            pathPlanObject.joint_angles = [0,-pi/2,pi/2,0]
+            pathPlanObject.go_to_joint_state()
 
   
   
