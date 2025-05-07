@@ -85,7 +85,7 @@ class MoveGroupPythonIntefaceTutorial(object):
     # EefState_publisher =  rospy.Publisher('/SetEndEffector', Bool, queue_size=10)                                        
 
     planning_frame = move_group.get_planning_frame()
-    print "============ Planning frame: %s" % planning_frame
+    print("============ Planning frame: %s" % planning_frame)
 
 
     move_group.set_workspace([-0.2984,-0.2984,0.0,0.2984,0.2984,0.4404])
@@ -120,7 +120,7 @@ class MoveGroupPythonIntefaceTutorial(object):
 
     current_joints = move_group.get_current_joint_values()
     current_pose = self.move_group.get_current_pose('link5').pose
-    print "current pose:" , current_pose.position 
+    print("current pose:" , current_pose.position )
     return all_close(joint_goal, current_joints, 0.01)
 
   def wait_for_state_update(self, box_is_known=False, box_is_attached=False, timeout=4):

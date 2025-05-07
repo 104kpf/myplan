@@ -98,8 +98,8 @@ class MoveGroupPythonIntefaceTutorial(object):
 
     current_joints = move_group.get_current_joint_values()
     current_pose = self.move_group.get_current_pose('link5').pose
-    print "current pose:"
-    print current_pose.position 
+    print("current pose:")
+    print(current_pose.position) 
     return all_close(joint_goal, current_joints, 0.01)
 
 
@@ -131,7 +131,7 @@ def main():
   global pub_EefState, EefState
   try:
     path_object = MoveGroupPythonIntefaceTutorial()
-    print "ctrl + z to close"
+    print("ctrl + z to close")
     while not rospy.is_shutdown():
   
         try:
